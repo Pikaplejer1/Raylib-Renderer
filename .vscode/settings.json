@@ -1,0 +1,7 @@
+{
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+        "*.c": "${capture}.h, ${capture}.o",
+        "Makefile": "*.exe"
+    }
+}
