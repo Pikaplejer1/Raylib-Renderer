@@ -2,6 +2,8 @@
 
 #define EPSILON 0.0001f
 #define M_PI 3.1415926535f
+#define DEG_TO_RAD(degrees) ((degrees) * M_PI / 180.0)
+
 typedef struct  {float x,y;} Vec2;
 
 typedef struct  {float x,y,z;} Vec3;
@@ -30,6 +32,7 @@ Vec3 vec3_minus(Vec3 A, Vec3 B);
 Vec3 vec3_normalize(Vec3 A);
 float vec3_length(Vec3 A);
 float vec3_length_sq(Vec3 A);
+Vec3 vec4_to_vec3(Vec4 A);
 
 float vec4_dot(Vec4 A, Vec4 B);
 Vec4 vec4_scalar(Vec4 A, float scalar);
@@ -47,6 +50,9 @@ Mat4 mat4_rotate_x(float angle);
 Mat4 mat4_rotate_y(float angle);
 Mat4 mat4_rotate_z(float angle);
 Vec4 mat4_mul_vec4(Mat4 m, Vec4 v);
+Vec4 vec3_to_vec4(Vec3 A);
 
 
 Vec2 project(Vec3 point, float fov);
+
+Vec2 ndc_to_screen(Vec2 ndc);

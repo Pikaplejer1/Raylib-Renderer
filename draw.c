@@ -124,6 +124,13 @@ void createPolarSphere(){
             drawLine(centre, endpoint, c);
         }
 }
+void resetBuffer(){
+    for(int i=0; i<SCREEN_HEIGHT;i++){
+        for(int j=0;j<SCREEN_WIDTH;j++){
+            framebuffer[i*SCREEN_WIDTH+j] = WHITE;
+        }
+    }
+}
     
 void writePixel(Vec2 a, Color c){
     if(a.x < 0 || a.x >= SCREEN_WIDTH || a.y < 0 || a.y >= SCREEN_HEIGHT) return;

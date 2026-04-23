@@ -1,7 +1,10 @@
 #include <math.h>
+#include <stdio.h>
 
 #include "mathD.h"
-#include <stdio.h>
+#include "logger.h"
+#include "global.h"
+
 float vec2_dot(Vec2 A, Vec2 B){
     return (A.x * B.x)+ (A.y*B.y);
 }
@@ -66,6 +69,11 @@ float vec3_length(Vec3 A){
 float vec3_length_sq(Vec3 A){
     return (A.x * A.x)+ (A.y * A.y) + (A.z*A.z);
 }
+Vec4 vec3_to_vec4(Vec3 A){
+    return (Vec4){A.x,A.y,A.z,1};
+}
+
+
 
 
 float vec4_dot(Vec4 A, Vec4 B){
@@ -81,6 +89,7 @@ Vec4 vec4_minus(Vec4 A, Vec4 B){
     return (Vec4){A.x-B.x, A.y-B.y, A.z-B.z, A.w-B.w};
 }
 Vec4 vec4_normalize(Vec4 A){
+
     float length = vec4_length(A);
     if(length< EPSILON) return (Vec4){0,0,0,0};
     return (Vec4){A.x/length, A.y/length, A.z/length,A.w/length};
@@ -162,9 +171,40 @@ Vec4 mat4_mul_vec4(Mat4 m, Vec4 v){
     };
 }
 
+Vec3 vec4_to_vec3(Vec4 A){
+    return(Vec3){
+        A.x/A.w,
+        A.y/A.w,
+        A.z/A.w 
+    };
+}
+
 Vec2 project(Vec3 point, float fov){
+    // printf("\n");
+    // logger_vec3(DEBUG, "Original vec3:\n x:%f, y:%f, z:%f", point);
+
+    if(point.z <=0){
+        // logger(WARNING, "point:{%f,%f,%f} is out of z bounds.", point.x, point.y, point.z);
+        return (Vec2){point.x, point.y};
+    }
+    float f = 1/tan(DEG_TO_RAD(fov/2));
+    Vec2 ndcPoint = {f*(point.x/point.z), f*(point.y/point.z)};
+    
+    if(ndcPoint.x <-1 || ndcPoint.x >1)
+        logger(WARNING, "X is out of bounds: %f",ndcPoint.x );
+    if(ndcPoint.y<-1 || ndcPoint.y >1)
+        logger(WARNING, "Y is out of bounds: %f",ndcPoint.y );
+        
+    // logger_vec2(DEBUG, "projected NDC:\n x:%f, y:%f", ndcPoint);
+    Vec2 screenPoint = ndc_to_screen(ndcPoint);
+    // logger_vec2(DEBUG, "projected Screen points:\n x:%f, y:%f", screenPoint);
+    return screenPoint;
+}
+
+
+Vec2 ndc_to_screen(Vec2 ndc){
     return (Vec2){
-        (point.x*fov) /point.z,
-        (point.y*fov) /point.z,
+        ((ndc.x+1)/2) *SCREEN_WIDTH,
+        ((ndc.y+1)/2 ) * SCREEN_HEIGHT
     };
 }

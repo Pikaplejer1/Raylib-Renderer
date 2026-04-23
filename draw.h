@@ -13,3 +13,4 @@ void writePixel(Vec2 a, Color c);
 void drawTriangle(Vec2 A, Vec2 B, Vec2 C, Color col);
 void drawFilledTriangle(Vec2 A, Vec2 B, Vec2 C, Color col);
 void writeThickPixel(Vec2 a, int thickness, Color c);
+void resetBuffer();

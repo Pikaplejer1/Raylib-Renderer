@@ -15,20 +15,20 @@ STAGE 2 — 2D drawing
         pick one method, understand it before coding
 
 STAGE 3 — math foundations
-11. [ ] Vec3 struct {float x, y, z}
-12. [ ] vec3 operations: add, subtract, dot product, cross product
-13. [ ] Mat4 struct (4x4 float matrix)
-14. [ ] mat4 multiply
-15. [ ] translation matrix, scale matrix, rotation matrix
+11. [✅] Vec3 struct {float x, y, z}
+12. [✅] vec3 operations: add, subtract, dot product, cross product
+13. [✅] Mat4 struct (4x4 float matrix)
+14. [✅] mat4 multiply
+15. [✅] translation matrix, scale matrix, rotation matrix
         research: "3Blue1Brown Essence of Linear Algebra", 
                   "model matrix view matrix projection matrix"
 
 STAGE 4 — 3D wireframe
-16. [ ] project Vec3 → Vec2 (perspective projection)
+16. [✅] project Vec3 → Vec2 (perspective projection)
         research: "perspective projection matrix from scratch",
                   "homogeneous coordinates"
-17. [ ] hardcode a cube (8 vertices, 12 edges)
-18. [ ] draw cube as wireframe
+17. [✅] hardcode a cube (8 vertices, 12 edges)
+18. [✅] draw cube as wireframe
 19. [ ] rotate cube with rotation matrix each frame
 
 STAGE 5 — rasterize 3D
