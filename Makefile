@@ -11,7 +11,7 @@ ARGS =
 
 all: renderer.exe 
 
-renderer.exe: renderer.o draw.o global.o util.o mathD.o logger.o
+renderer.exe: renderer.o draw.o global.o util.o mathD.o logger.o objects.o
 	$(CC) $(CFLAGS) $^ -o $@ -I$(CPPFLAGS) -L$(LDFLAGS) $(LDLIBS)
 
 renderer.o: renderer.c renderer.h global.h
@@ -32,6 +32,8 @@ mathD.o: mathD.c mathD.h
 logger.o: logger.c logger.h
 	$(CC) $(CFLAGS) -c $< -I$(CPPFLAGS) -o $@
 
+objects.o: objects.c objects.h
+	$(CC) $(CFLAGS) -c $< -I$(CPPFLAGS) -o $@
 
 test.exe: test.o mathD.o
 	$(CC) $(CFLAGS) $^ -o $@ -I$(CPPFLAGS) -L$(LDFLAGS) $(LDLIBS)

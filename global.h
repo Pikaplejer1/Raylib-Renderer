@@ -4,6 +4,7 @@
 #define SCREEN_WIDTH 2048
 #define SCREEN_HEIGHT 2048
 #define FOV 80
+#define TRANSPARENT (Color){0,0,0,0}
 
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))

@@ -166,9 +166,9 @@ void drawTriangle(Vec2 A, Vec2 B, Vec2 C, Color col){
 }
 
 
-void drawFilledTriangle(Vec2 A, Vec2 B, Vec2 C, Color col){
+void drawFilledTriangle(Vec2 A, Vec2 B, Vec2 C, Color outlineCol, Color fillCol){
     //draw the outline:
-    drawTriangle(A,B,C,RED);
+    drawTriangle(A,B,C,outlineCol);
     // get the bounding box of the triangle, future idea try to follow f(x) that goes throg x_n and y_n
     int lowestY = MAX(MAX(A.y,B.y), C.y);
     int lowestX = MIN(MIN(A.x,B.x),C.x);
@@ -198,9 +198,26 @@ void drawFilledTriangle(Vec2 A, Vec2 B, Vec2 C, Color col){
                 (lambda_A >=0 && lambda_A <=1)  &&
                 (lambda_B>=0 && lambda_B<=1)    &&
                 (lambda_C>=0 && lambda_C<=1)){
-                writePixel((Vec2){j,i},col);
+                writePixel((Vec2){j,i},fillCol);
             }
         }
     }
 
+}
+
+
+void drawFace(Vec3 *vertices, int *faces, Color c){
+    Vec2 verticesVec2[6];
+    for(int i=0;i<6;i++){
+        verticesVec2[i] = project(vertices[i], FOV);
+    }
+    for(int i=0; i<6;i++){
+        Vec2 f1 = verticesVec2[faces[0]];
+        Vec2 f2 = verticesVec2[faces[1]];
+        Vec2 f3 = verticesVec2[faces[2]];
+        Vec2 f4 = verticesVec2[faces[3]];
+        
+        drawFilledTriangle(f1,f2,f3,TRANSPARENT, c);
+        drawFilledTriangle(f1,f4,f3,TRANSPARENT, c);
+    }
 }

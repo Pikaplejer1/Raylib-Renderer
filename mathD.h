@@ -1,5 +1,6 @@
 #pragma once
 
+
 #define EPSILON 0.0001f
 #define M_PI 3.1415926535f
 #define DEG_TO_RAD(degrees) ((degrees) * M_PI / 180.0)
@@ -13,6 +14,7 @@ typedef struct
 {
     float m[4][4];
 } Mat4;
+
 
 
 float vec2_dot(Vec2 A, Vec2 B);
@@ -56,3 +58,4 @@ Vec4 vec3_to_vec4(Vec3 A);
 Vec2 project(Vec3 point, float fov);
 
 Vec2 ndc_to_screen(Vec2 ndc);
+

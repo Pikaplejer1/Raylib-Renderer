@@ -29,7 +29,7 @@ STAGE 4 — 3D wireframe
                   "homogeneous coordinates"
 17. [✅] hardcode a cube (8 vertices, 12 edges)
 18. [✅] draw cube as wireframe
-19. [ ] rotate cube with rotation matrix each frame
+19. [✅] rotate cube with rotation matrix each frame
 
 STAGE 5 — rasterize 3D
 20. [ ] fillTriangle on cube faces (flat color per face)
