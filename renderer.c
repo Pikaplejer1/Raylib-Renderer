@@ -48,7 +48,9 @@ void innitImg(){
 
 
 
-int main(){
+int main(int argc, int **argv){
+    if(argc == 1) setLogLevel(NONE);
+    else setLogLevel(argv[1]);
     
     // access it: framebuffer[i*screen_width + j]
     InitWindow(SCREEN_WIDTH,SCREEN_HEIGHT, "atari brakeout type shit ");
