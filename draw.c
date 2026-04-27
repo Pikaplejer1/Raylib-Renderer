@@ -185,16 +185,10 @@ void drawFilledTriangle(Vec2 A, Vec2 B, Vec2 C, Color outlineCol, Color fillCol)
             // printf("i:%d j:%d \n",i,j);
             //y -> i; x -> j
             Vec2 r ={j,i};
-            lambda_A = 
-            (vec2_cross(vec2_minus(r,C), vec2_minus(B,C) ))/
-            (vec2_cross(vec2_minus(A,C), vec2_minus(B,C)));
-            lambda_B = 
-            (vec2_cross(vec2_minus(r,A), vec2_minus(C,A)))/
-            (vec2_cross(vec2_minus(A,C),vec2_minus(B,C)));
-
-            lambda_C = 1 - lambda_B - lambda_A;
+            getBaricentric(A,B,C,r,&lambda_A, &lambda_B, &lambda_C);
             // printf("LambdaA:%5f ;LambdaB:%5f ;LambdaC:%5f\n ", lambda_A,lambda_B,lambda_C);
-           if(
+           
+            if(
                 (lambda_A >=0 && lambda_A <=1)  &&
                 (lambda_B>=0 && lambda_B<=1)    &&
                 (lambda_C>=0 && lambda_C<=1)){
@@ -206,18 +200,15 @@ void drawFilledTriangle(Vec2 A, Vec2 B, Vec2 C, Color outlineCol, Color fillCol)
 }
 
 
-void drawFace(Vec3 *vertices, int *faces, Color c){
-    Vec2 verticesVec2[6];
-    for(int i=0;i<6;i++){
-        verticesVec2[i] = project(vertices[i], FOV);
-    }
-    for(int i=0; i<6;i++){
-        Vec2 f1 = verticesVec2[faces[0]];
-        Vec2 f2 = verticesVec2[faces[1]];
-        Vec2 f3 = verticesVec2[faces[2]];
-        Vec2 f4 = verticesVec2[faces[3]];
-        
-        drawFilledTriangle(f1,f2,f3,TRANSPARENT, c);
-        drawFilledTriangle(f1,f4,f3,TRANSPARENT, c);
-    }
+void drawFace(Vec2 *pointsToDraw, int *face, Color c){
+    Vec2 A,B,C,D;
+    A= pointsToDraw[face[0]];
+    B= pointsToDraw[face[1]];
+    C= pointsToDraw[face[2]];
+    D= pointsToDraw[face[3]];
+    drawFilledTriangle(A,B,C, TRANSPARENT,c);
+    drawFilledTriangle(A,C,D, TRANSPARENT,c);
+    drawFilledTriangle(A,B,D, TRANSPARENT,c);
+    drawFilledTriangle(D,B,C, TRANSPARENT,c);
+    
 }

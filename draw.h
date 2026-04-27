@@ -15,4 +15,4 @@ void drawFilledTriangle(Vec2 A, Vec2 B, Vec2 C, Color outlineCol, Color fillCol)
 void writeThickPixel(Vec2 a, int thickness, Color c);
 void resetBuffer();
 
-void drawFace(Vec3 *vertices, int *faces, Color c);
+void drawFace(Vec2 *pointsToDraw, int *face, Color c);

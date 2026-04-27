@@ -7,7 +7,7 @@
 #define BLU   "\033[0;34m"
 #define RESET "\033[0m"
 
-LEVEL logLevel =NONE;
+LEVEL logLevel =DEBUG;
 
 void logger(const LEVEL level,const char *format, ...){
     va_list args;

@@ -208,3 +208,15 @@ Vec2 ndc_to_screen(Vec2 ndc){
         ((ndc.y+1)/2 ) * SCREEN_HEIGHT
     };
 }
+
+void getBaricentric(Vec2 A, Vec2 B, Vec2 C,
+    Vec2 p, 
+    float* l1, float* l2, float* l3){
+        *l1 = 
+        (vec2_cross(vec2_minus(p,C), vec2_minus(B,C) ))/
+        (vec2_cross(vec2_minus(A,C), vec2_minus(B,C)));
+        *l2 = 
+        (vec2_cross(vec2_minus(p,A), vec2_minus(C,A)))/
+        (vec2_cross(vec2_minus(A,C),vec2_minus(B,C)));
+        *l3 = 1 - *l2 - *l1;
+}

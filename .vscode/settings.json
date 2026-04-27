@@ -3,5 +3,6 @@
     "explorer.fileNesting.patterns": {
         "*.c": "${capture}.h, ${capture}.o",
         "Makefile": "*.exe"
-    }
+    },
+    "makefile.configureOnOpen": false
 }
