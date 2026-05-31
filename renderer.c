@@ -46,7 +46,10 @@ void innitImg(){
 
 
 int main(int argc, char **argv){
-    
+    Color col[10];
+    for(int i=0; i<10; i++){
+        col[i] = getRandomColor();
+    }
     // access it: framebuffer[i*screen_width + j]
     InitWindow(SCREEN_WIDTH,SCREEN_HEIGHT, "atari brakeout type shit ");
     SetTargetFPS(144);
@@ -82,16 +85,13 @@ int main(int argc, char **argv){
     Vec2 toDraw[8];
     
     while(!WindowShouldClose()){
-        Mat4 rotate_x =mat4_rotate_x(GetTime());
-        Mat4 rotate_y = mat4_rotate_y(GetTime()/2);
-        Mat4 rotate_z = mat4_rotate_z(GetTime()/3);
+        Mat4 rotate_x = mat4_identity();//mat4_rotate_x(GetTime());
+        Mat4 rotate_y =mat4_rotate_y(GetTime()/2);
+        Mat4 rotate_z =mat4_rotate_z(GetTime()/3);
         for(int i=0;i<8;i++){
             Mat4 transformationMatrix = 
-                mat4_multiply(translationToOrigin, 
                 mat4_multiply(rotate_z,
-                mat4_multiply(rotate_y, 
-                    mat4_multiply(rotate_x, 
-                        translationToCentre))));
+                mat4_multiply(rotate_y,rotate_x));
                         
             Vec4 verticesVec4 = vec3_to_vec4( cubeVertices[i]);
             Vec4 newPos = mat4_mul_vec4(translationToCentre, verticesVec4);
@@ -111,7 +111,7 @@ int main(int argc, char **argv){
             // D= toDraw[cubeFaces[i][3]];
             // drawFilledTriangle(A,B,C, RED,YELLOW);
             // drawFilledTriangle(A,D,C, RED,YELLOW);
-            drawFace(toDraw, cubeFaces[i], BLACK);
+            drawFace(toDraw, cubeFaces[i], col[i]);
         }
         rlDrawingAPI();
     }

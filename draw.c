@@ -6,7 +6,7 @@
 #include "util.h"
 #include "draw.h"
 #include "mathD.h"
-
+#include "logger.h"
 void drawLineH(Vec2 a, Vec2 b, Color c){
     int x0 = a.x;
     int y0= a.y;
@@ -170,32 +170,96 @@ void drawFilledTriangle(Vec2 A, Vec2 B, Vec2 C, Color outlineCol, Color fillCol)
     //draw the outline:
     drawTriangle(A,B,C,outlineCol);
     // get the bounding box of the triangle, future idea try to follow f(x) that goes throg x_n and y_n
-    int lowestY = MAX(MAX(A.y,B.y), C.y);
-    int lowestX = MIN(MIN(A.x,B.x),C.x);
-    int highestY = MIN(MIN(A.y, B.y), C.y);
+    // int lowestY = MAX(MAX(A.y,B.y), C.y);
+    // int lowestX = MIN(MIN(A.x,B.x),C.x);
+    // int highestY = MIN(MIN(A.y, B.y), C.y);
+    // int highestX = MAX(MAX(A.x, B.x), C.x);
+    int lowestY = MIN(MIN(A.y, B.y), C.y);
+    int lowestX = MIN(MIN(A.x, B.x), C.y);
+    int highestY = MAX(MAX(A.y, B.y), C.y);
     int highestX = MAX(MAX(A.x, B.x), C.x);
+    float lambda1, lambda2, lambda3;
+    // logger(DEBUG,"lowY: %d, lowX: %d, highY:%d, highX: %d", lowestY, lowestX, highestY,highestX);
+    /*
+    iterate top to bottom -> i;
+    get left and right use bin search. 
+    check middle, go left if inside triangle, go left if outside of triangle go right
+    check middle go right if inside triangle go right, if outside fo left. 
+    draw line left to right. 
+    */
+    for(int i=lowestY; i<highestY; i++){
+        int low = lowestX;
+        int high = highestX;
+        int mid = low +(high-low)/2;
+        bool gotLeft = false;
+        Vec2 l;
+        while(!gotLeft){
+            // logger(DEBUG, "low: %d, high: %d, mid: %d", low,mid,high);
+            getBaricentric(A,B,C,(Vec2){mid, i},&lambda1, &lambda2, &lambda3);
+            // printf("LambdaA: %5f; LambdaB: %5f; LambdaC: %5f\n ", lambda1,lambda2,lambda3);
 
-    
-    float lambda_A;
-    float lambda_B;
-    float lambda_C;
-    
-    for(int i=highestY;i<lowestY;i++){
-        for(int j=lowestX;j<highestX;j++){
-            // printf("i:%d j:%d \n",i,j);
-            //y -> i; x -> j
-            Vec2 r ={j,i};
-            getBaricentric(A,B,C,r,&lambda_A, &lambda_B, &lambda_C);
-            // printf("LambdaA:%5f ;LambdaB:%5f ;LambdaC:%5f\n ", lambda_A,lambda_B,lambda_C);
-           
             if(
-                (lambda_A >=0 && lambda_A <=1)  &&
-                (lambda_B>=0 && lambda_B<=1)    &&
-                (lambda_C>=0 && lambda_C<=1)){
-                writePixel((Vec2){j,i},fillCol);
+                (lambda1 >=0 && lambda1 <=1)  &&
+                (lambda2>=0 && lambda2<=1)    &&
+                (lambda3>=0 && lambda3<=1)){ // inside the triangle 
+                    high = mid;
+            }else{
+                low = mid;
+            }
+            mid = low + (high - low) / 2;
+            if(mid==low || mid == high) {
+                logger(WARNING, "converged");
+                gotLeft = true;
+                l = (Vec2) { mid, i};
             }
         }
+        low = lowestX;
+        high = highestX;
+        mid = low +(high-low)/2;
+        bool gotRight =false;
+        Vec2 r;
+        while(!gotRight){
+            getBaricentric(A,B,C,(Vec2){mid, i},&lambda1, &lambda2, &lambda3);
+            if(
+                (lambda1 >=0 && lambda1 <=1)  &&
+                (lambda2>=0 && lambda2<=1)    &&
+                (lambda3>=0 && lambda3<=1)){ // inside the triangle 
+                    low = mid;
+                    
+            }else{
+                high = mid;
+            }
+            mid = low + (high - low) / 2;
+            if(mid==low || mid == high) {
+                logger(WARNING, "converged");
+                gotRight = true;
+                r = (Vec2) { mid, i};
+            }
+        }
+        drawLine(l,r,RED);
+
     }
+
+    // float lambda_A;
+    // float lambda_B;
+    // float lambda_C;
+    
+    // for(int i=highestY;i<lowestY;i++){
+    //     for(int j=lowestX;j<highestX;j++){
+    //         // printf("i:%d j:%d \n",i,j);
+    //         //y -> i; x -> j
+    //         Vec2 r ={j,i};
+    //         getBaricentric(A,B,C,r,&lambda_A, &lambda_B, &lambda_C);
+    //         // printf("LambdaA:%5f ;LambdaB:%5f ;LambdaC:%5f\n ", lambda_A,lambda_B,lambda_C);
+           
+    //         if(
+    //             (lambda_A >=0 && lambda_A <=1)  &&
+    //             (lambda_B>=0 && lambda_B<=1)    &&
+    //             (lambda_C>=0 && lambda_C<=1)){
+    //             writePixel((Vec2){j,i},fillCol);
+    //         }
+    //     }
+    // }
 
 }
 
