@@ -219,4 +219,111 @@ void getBaricentric(Vec2 A, Vec2 B, Vec2 C,
         (vec2_cross(vec2_minus(p,A), vec2_minus(C,A)))/
         (vec2_cross(vec2_minus(A,C),vec2_minus(B,C)));
         *l3 = 1 - *l2 - *l1;
+    }
+    //todo fix it to return int, and a pointer. 
+Vec2 getInfiniteLineIntersectionPoint(Vec2 Line1Point1, Vec2 Line1Point2, Vec2 Line2Point1, Vec2 Line2Point2){
+
+    Vec2 intersectionPoint;
+
+    float x1 = Line1Point1.x;
+    float x2 = Line1Point2.x;
+    float x3 = Line2Point1.x;
+    float x4 = Line2Point2.x;
+
+    float y1 = Line1Point1.y;
+    float y2 = Line1Point2.y;
+    float y3 = Line2Point1.y;
+    float y4 = Line2Point2.y;
+
+    float det12   = x1*y2 - x2*y1; 
+    float det34    = x3*y4 - x4*y3;
+
+    float diffX1  = x1 - x2;
+    float diffX2  = x3 - x4;
+    float diffY1  = y1 - y2;
+    float diffY2  = y3 - y4;
+
+    float denominator = diffX1 * diffY2 - diffY1 * diffX2;
+
+    float nominatorX = det12 * diffX2 - diffX1 * det34;
+    float nominatorY = det12 * diffY2 - diffY1 * det34;
+
+    if (fabsf(denominator) < 1e-6f) {
+        return (Vec2){-9999,-9999};
+    }
+
+    intersectionPoint.x = nominatorX / denominator;
+    intersectionPoint.y = nominatorY / denominator;
+
+    return intersectionPoint;
+}
+
+
+int getSegmentLineIntersectionPoint(Vec2 Line1Point1, Vec2 Line1Point2, Vec2 Line2Point1, Vec2 Line2Point2, Vec2* out){
+    Vec2 intersectionPoint;
+
+    float x1 = Line1Point1.x;
+    float x2 = Line1Point2.x;
+    float x3 = Line2Point1.x;
+    float x4 = Line2Point2.x;
+
+    float y1 = Line1Point1.y;
+    float y2 = Line1Point2.y;
+    float y3 = Line2Point1.y;
+    float y4 = Line2Point2.y;
+
+    /*
+    s(x2-x1) - t(x4-x3) = x3-x1
+    s(y2-y1) - t(y4-y3) = y3-y1
+
+    a*s + b*t = e
+    c*s + d*t = f
+
+    a = dX1;
+    b = dX2;
+    c = dY1;
+    d = dY2;
+    e = diffX;
+    f = diffY;
+
+    s = (e*d - b*f) / (a*d - b*c)
+    t = (a*f - e*c) / (a*d - b*c)
+    */
+
+    float dX1 = x2-x1;
+    float dX2 = -(x4-x3);
+    float dY1 = y2-y1;
+    float dY2 = -(y4-y3);
+
+    float diffX = x3-x1;
+    float diffY = y3-y1;
+
+    float denom = dX1*dY2 - (dX2*dY1);
+
+    if (fabsf(denom) < 1e-6f) {
+        return 0;
+    }
+    float nominS = diffX * dY2 - (dX2 * diffY);
+    float nominT = dX1 * diffY - (diffX * dY1);
+
+    float s = nominS/denom;
+    float t = nominT/denom;
+
+    if(s<0 || s> 1 || t<0 || t>1){
+        return 0; 
+    }
+
+    /*
+    x0 = x1 + s(x2 - x1)
+    y0 = y1 + s(y2 - y1)
+*/
+
+    float x0 =x1 + s*(x2-x1);
+    float y0 =y1 + s*(y2-y1); 
+    
+    out->x = x0;
+    out->y =y0;
+
+    return 1;
+
 }

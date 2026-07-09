@@ -7,6 +7,8 @@
 #include "draw.h"
 #include "mathD.h"
 #include "logger.h"
+
+
 void drawLineH(Vec2 a, Vec2 b, Color c){
     int x0 = a.x;
     int y0= a.y;
@@ -170,75 +172,34 @@ void drawFilledTriangle(Vec2 A, Vec2 B, Vec2 C, Color outlineCol, Color fillCol)
     //draw the outline:
     drawTriangle(A,B,C,outlineCol);
     // get the bounding box of the triangle, future idea try to follow f(x) that goes throg x_n and y_n
-    // int lowestY = MAX(MAX(A.y,B.y), C.y);
-    // int lowestX = MIN(MIN(A.x,B.x),C.x);
-    // int highestY = MIN(MIN(A.y, B.y), C.y);
-    // int highestX = MAX(MAX(A.x, B.x), C.x);
-    int lowestY = MIN(MIN(A.y, B.y), C.y);
-    int lowestX = MIN(MIN(A.x, B.x), C.y);
-    int highestY = MAX(MAX(A.y, B.y), C.y);
-    int highestX = MAX(MAX(A.x, B.x), C.x);
-    float lambda1, lambda2, lambda3;
-    // logger(DEBUG,"lowY: %d, lowX: %d, highY:%d, highX: %d", lowestY, lowestX, highestY,highestX);
-    /*
-    iterate top to bottom -> i;
-    get left and right use bin search. 
-    check middle, go left if inside triangle, go left if outside of triangle go right
-    check middle go right if inside triangle go right, if outside fo left. 
-    draw line left to right. 
-    */
-    for(int i=lowestY; i<highestY; i++){
-        int low = lowestX;
-        int high = highestX;
-        int mid = low +(high-low)/2;
-        bool gotLeft = false;
-        Vec2 l;
-        while(!gotLeft){
-            // logger(DEBUG, "low: %d, high: %d, mid: %d", low,mid,high);
-            getBaricentric(A,B,C,(Vec2){mid, i},&lambda1, &lambda2, &lambda3);
-            // printf("LambdaA: %5f; LambdaB: %5f; LambdaC: %5f\n ", lambda1,lambda2,lambda3);
+    int lowestY = MIN(MIN(A.y,B.y), C.y);
+    int lowestX = MIN(MIN(A.x,B.x), C.x);
+    int highestY = MAX(MAX(A.y,B.y), C.y);
+    int highestX =MAX(MAX(A.x,B.x), C.x);
 
-            if(
-                (lambda1 >=0 && lambda1 <=1)  &&
-                (lambda2>=0 && lambda2<=1)    &&
-                (lambda3>=0 && lambda3<=1)){ // inside the triangle 
-                    high = mid;
-            }else{
-                low = mid;
-            }
-            mid = low + (high - low) / 2;
-            if(mid==low || mid == high) {
-                logger(WARNING, "converged");
-                gotLeft = true;
-                l = (Vec2) { mid, i};
-            }
-        }
-        low = lowestX;
-        high = highestX;
-        mid = low +(high-low)/2;
-        bool gotRight =false;
-        Vec2 r;
-        while(!gotRight){
-            getBaricentric(A,B,C,(Vec2){mid, i},&lambda1, &lambda2, &lambda3);
-            if(
-                (lambda1 >=0 && lambda1 <=1)  &&
-                (lambda2>=0 && lambda2<=1)    &&
-                (lambda3>=0 && lambda3<=1)){ // inside the triangle 
-                    low = mid;
-                    
-            }else{
-                high = mid;
-            }
-            mid = low + (high - low) / 2;
-            if(mid==low || mid == high) {
-                logger(WARNING, "converged");
-                gotRight = true;
-                r = (Vec2) { mid, i};
-            }
-        }
-        drawLine(l,r,RED);
+    const int leftmostX =0;
+    const int rightmostX = SCREEN_WIDTH;
+
+
+    for(int i=lowestY; i<highestY ;i++){
+        Vec2 left = {leftmostX, i};
+        Vec2 right = {rightmostX,i};
+        
+        Vec2 intersectionAB;
+        Vec2 intersectionBC;
+        Vec2 intersectionCA;
+        
+        int AB = getSegmentLineIntersectionPoint(left,right,A,B,&intersectionAB);
+        int BC= getSegmentLineIntersectionPoint(left,right,B,C,&intersectionBC);
+        int CA= getSegmentLineIntersectionPoint(left,right,C,A,&intersectionCA);
+        
+        if(AB==0) drawLine(intersectionBC, intersectionCA, fillCol);
+        if(BC==0) drawLine(intersectionAB, intersectionCA, fillCol);
+        if(CA==0) drawLine(intersectionAB, intersectionBC, fillCol);
+        
 
     }
+
 
     // float lambda_A;
     // float lambda_B;

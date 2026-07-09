@@ -1,0 +1,14 @@
+gcc -Wall -std=c99 -Wno-missing-braces -Wno-unused-variable  -c renderer.c  -o renderer.o
+gcc -Wall -std=c99 -Wno-missing-braces -Wno-unused-variable  -c draw.c  -o draw.o
+gcc -Wall -std=c99 -Wno-missing-braces -Wno-unused-variable  -c global.c  -o global.o
+gcc -Wall -std=c99 -Wno-missing-braces -Wno-unused-variable  -c util.c  -o util.o
+gcc -Wall -std=c99 -Wno-missing-braces -Wno-unused-variable  -c mathD.c  -o mathD.o
+gcc -Wall -std=c99 -Wno-missing-braces -Wno-unused-variable  -c logger.c  -o logger.o
+gcc -Wall -std=c99 -Wno-missing-braces -Wno-unused-variable  -c objects.c  -o objects.o
+gcc -Wall -std=c99 -Wno-missing-braces -Wno-unused-variable  renderer.o draw.o global.o util.o mathD.o logger.o objects.o -o renderer.exe -lraylib  -lm
+/usr/bin/ld: draw.o: in function `drawFilledTriangle':
+draw.c:(.text+0xbde): undefined reference to `getSegmentLineIntersectionPoint'
+/usr/bin/ld: draw.c:(.text+0xc11): undefined reference to `getSegmentLineIntersectionPoint'
+/usr/bin/ld: draw.c:(.text+0xc44): undefined reference to `getSegmentLineIntersectionPoint'
+collect2: error: ld returned 1 exit status
+make: *** [Makefile:13: renderer.exe] Error 1

@@ -60,3 +60,7 @@ Vec2 project(Vec3 point, float fov);
 Vec2 ndc_to_screen(Vec2 ndc);
 
 void getBaricentric(Vec2 A, Vec2 B, Vec2 C, Vec2 p, float* l1, float* l2, float* l3);
+
+Vec2 getInfiniteLineIntersectionPoint(Vec2 Line1Point1, Vec2 Line1Point2, Vec2 Line2Point1, Vec2 Line2Point2);
+
+int getSegmentLineIntersectionPoint(Vec2 Line1Point1, Vec2 Line1Point2, Vec2 Line2Point1, Vec2 Line2Point2, Vec2* out);
