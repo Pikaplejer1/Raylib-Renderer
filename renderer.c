@@ -15,7 +15,8 @@
 void rlDrawingAPI(){
     UpdateTexture(tex, framebuffer);
     BeginDrawing();
-        DrawTexture(tex,0,0,WHITE);
+    ClearBackground(WHITE);
+    DrawTexture(tex,0,0,WHITE);
     EndDrawing();   
     resetBuffer();
 }
@@ -103,7 +104,7 @@ int main(int argc, char **argv){
         for(int i=0;i<8;i++){
             writeThickPixel(toDraw[i], 36, RED);
         }
-        for(int i=0; i<3;i++){
+        for(int i=0; i<6;i++){
             // Vec2 A,B,C,D;
             // A= toDraw[cubeFaces[i][0]];
             // B= toDraw[cubeFaces[i][1]];

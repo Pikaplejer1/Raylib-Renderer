@@ -169,36 +169,41 @@ void drawTriangle(Vec2 A, Vec2 B, Vec2 C, Color col){
 
 
 void drawFilledTriangle(Vec2 A, Vec2 B, Vec2 C, Color outlineCol, Color fillCol){
-    //draw the outline:
-    drawTriangle(A,B,C,outlineCol);
-    // get the bounding box of the triangle, future idea try to follow f(x) that goes throg x_n and y_n
-    int lowestY = MIN(MIN(A.y,B.y), C.y);
-    int lowestX = MIN(MIN(A.x,B.x), C.x);
-    int highestY = MAX(MAX(A.y,B.y), C.y);
-    int highestX =MAX(MAX(A.x,B.x), C.x);
+    // sortujemy wierzchołki rosnąco po y: A na górze, C na dole
+    if (A.y > B.y) { Vec2 tmp=A; A=B; B=tmp; }
+    if (B.y > C.y) { Vec2 tmp=B; B=C; C=tmp; }
+    if (A.y > B.y) { Vec2 tmp=A; A=B; B=tmp; }
 
-    const int leftmostX =0;
-    const int rightmostX = SCREEN_WIDTH;
+    int y0 = (int)A.y;
+    int y1 = (int)B.y;
+    int y2 = (int)C.y;
 
-
-    for(int i=lowestY; i<highestY ;i++){
-        Vec2 left = {leftmostX, i};
-        Vec2 right = {rightmostX,i};
-        
-        Vec2 intersectionAB;
-        Vec2 intersectionBC;
-        Vec2 intersectionCA;
-        
-        int AB = getSegmentLineIntersectionPoint(left,right,A,B,&intersectionAB);
-        int BC= getSegmentLineIntersectionPoint(left,right,B,C,&intersectionBC);
-        int CA= getSegmentLineIntersectionPoint(left,right,C,A,&intersectionCA);
-        
-        if(AB==0) drawLine(intersectionBC, intersectionCA, fillCol);
-        if(BC==0) drawLine(intersectionAB, intersectionCA, fillCol);
-        if(CA==0) drawLine(intersectionAB, intersectionBC, fillCol);
-        
-
+    // góra: krótka krawędź A->B, długa krawędź A->C
+    for (int y = y0; y < y1; y++) {
+        float tAC = (C.y - A.y != 0) ? (y - A.y) / (C.y - A.y) : 0;
+        float tAB = (B.y - A.y != 0) ? (y - A.y) / (B.y - A.y) : 0;
+        float xAC = A.x + tAC * (C.x - A.x);
+        float xAB = A.x + tAB * (B.x - A.x);
+        int xStart = (int)fminf(xAC, xAB);
+        int xEnd   = (int)fmaxf(xAC, xAB);
+        for (int x = xStart; x <= xEnd; x++) {
+            writePixel((Vec2){x, y}, fillCol);
+        }
     }
+
+    // dół: krótka krawędź B->C, długa krawędź A->C
+    for (int y = y1; y < y2; y++) {
+        float tAC = (C.y - A.y != 0) ? (y - A.y) / (C.y - A.y) : 0;
+        float tBC = (C.y - B.y != 0) ? (y - B.y) / (C.y - B.y) : 0;
+        float xAC = A.x + tAC * (C.x - A.x);
+        float xBC = B.x + tBC * (C.x - B.x);
+        int xStart = (int)fminf(xAC, xBC);
+        int xEnd   = (int)fmaxf(xAC, xBC);
+        for (int x = xStart; x <= xEnd; x++) {
+            writePixel((Vec2){x, y}, fillCol);
+        }
+    }
+}
 
 
     // float lambda_A;
@@ -222,7 +227,7 @@ void drawFilledTriangle(Vec2 A, Vec2 B, Vec2 C, Color outlineCol, Color fillCol)
     //     }
     // }
 
-}
+
 
 
 void drawFace(Vec2 *pointsToDraw, int *face, Color c){
@@ -231,9 +236,7 @@ void drawFace(Vec2 *pointsToDraw, int *face, Color c){
     B= pointsToDraw[face[1]];
     C= pointsToDraw[face[2]];
     D= pointsToDraw[face[3]];
+
     drawFilledTriangle(A,B,C, TRANSPARENT,c);
     drawFilledTriangle(A,C,D, TRANSPARENT,c);
-    drawFilledTriangle(A,B,D, TRANSPARENT,c);
-    drawFilledTriangle(D,B,C, TRANSPARENT,c);
-    
 }

@@ -183,21 +183,13 @@ Vec2 project(Vec3 point, float fov){
     // printf("\n");
     // logger_vec3(DEBUG, "Original vec3:\n x:%f, y:%f, z:%f", point);
 
-    if(point.z <=0){
-        // logger(WARNING, "point:{%f,%f,%f} is out of z bounds.", point.x, point.y, point.z);
-        return (Vec2){point.x, point.y};
+    const float NEAR = 1.0f;  
+    if(point.z < NEAR){
+        point.z = NEAR;  
     }
     float f = 1/tan(DEG_TO_RAD(fov/2));
     Vec2 ndcPoint = {f*(point.x/point.z), f*(point.y/point.z)};
-    
-    if(ndcPoint.x <-1 || ndcPoint.x >1)
-        logger(WARNING, "X is out of bounds: %f",ndcPoint.x );
-    if(ndcPoint.y<-1 || ndcPoint.y >1)
-        logger(WARNING, "Y is out of bounds: %f",ndcPoint.y );
-        
-    // logger_vec2(DEBUG, "projected NDC:\n x:%f, y:%f", ndcPoint);
     Vec2 screenPoint = ndc_to_screen(ndcPoint);
-    // logger_vec2(DEBUG, "projected Screen points:\n x:%f, y:%f", screenPoint);
     return screenPoint;
 }
 
