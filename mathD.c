@@ -179,10 +179,9 @@ Vec3 vec4_to_vec3(Vec4 A){
     };
 }
 
-Vec2 project(Vec3 point, float fov){
+ProjectedVertex project(Vec3 point, float fov){
     // printf("\n");
     // logger_vec3(DEBUG, "Original vec3:\n x:%f, y:%f, z:%f", point);
-
     const float NEAR = 1.0f;  
     if(point.z < NEAR){
         point.z = NEAR;  
@@ -190,7 +189,9 @@ Vec2 project(Vec3 point, float fov){
     float f = 1/tan(DEG_TO_RAD(fov/2));
     Vec2 ndcPoint = {f*(point.x/point.z), f*(point.y/point.z)};
     Vec2 screenPoint = ndc_to_screen(ndcPoint);
-    return screenPoint;
+    ProjectedVertex projectedVertex = {screenPoint,point.z};
+
+    return projectedVertex;
 }
 
 

@@ -126,14 +126,21 @@ void createPolarSphere(){
             drawLine(centre, endpoint, c);
         }
 }
-void resetBuffer(){
-    for(int i=0; i<SCREEN_HEIGHT;i++){
-        for(int j=0;j<SCREEN_WIDTH;j++){
-            framebuffer[i*SCREEN_WIDTH+j] = WHITE;
-        }
+
+
+void writeDepthPixel(Vec2 a, float z, Color c){
+    if(a.x < 0 || a.x >= SCREEN_WIDTH || a.y < 0 || a.y >= SCREEN_HEIGHT) return;
+
+    int x=a.x;
+    int y=a.y;
+    int index = y*SCREEN_WIDTH + x;
+
+    if(z<zBuffer[index]){
+        zBuffer[index] = z;
+        framebuffer[index] = c;
     }
 }
-    
+
 void writePixel(Vec2 a, Color c){
     if(a.x < 0 || a.x >= SCREEN_WIDTH || a.y < 0 || a.y >= SCREEN_HEIGHT) return;
 
@@ -168,26 +175,67 @@ void drawTriangle(Vec2 A, Vec2 B, Vec2 C, Color col){
 }
 
 
-void drawFilledTriangle(Vec2 A, Vec2 B, Vec2 C, Color outlineCol, Color fillCol){
+void drawFilledTriangle(ProjectedVertex APoint, ProjectedVertex BPoint, ProjectedVertex CPoint, Color outlineCol, Color fillCol){
+    
+    
+    Vec2 A = APoint.point;
+    Vec2 B = BPoint.point;
+    Vec2 C = CPoint.point;
+
+
+    float Az =APoint.depth;
+    float Bz =BPoint.depth;
+    float Cz =CPoint.depth;
+
     // sortujemy wierzchołki rosnąco po y: A na górze, C na dole
-    if (A.y > B.y) { Vec2 tmp=A; A=B; B=tmp; }
-    if (B.y > C.y) { Vec2 tmp=B; B=C; C=tmp; }
-    if (A.y > B.y) { Vec2 tmp=A; A=B; B=tmp; }
+    if (A.y > B.y) { 
+        Vec2 tmp=A; A=B; B=tmp;
+        float ftmp=Az; Az=Bz; Bz=ftmp;
+    }
+    if (B.y > C.y) { 
+        Vec2 tmp=B; B=C; C=tmp; 
+        float ftmp=Bz; Bz=Cz; Cz=ftmp;
+    }
+    if (A.y > B.y) { 
+        Vec2 tmp=A; A=B; B=tmp; 
+        float ftmp=Az; Az=Bz; Bz=ftmp;
+    }
+
+    
 
     int y0 = (int)A.y;
     int y1 = (int)B.y;
     int y2 = (int)C.y;
 
+    
+
     // góra: krótka krawędź A->B, długa krawędź A->C
     for (int y = y0; y < y1; y++) {
         float tAC = (C.y - A.y != 0) ? (y - A.y) / (C.y - A.y) : 0;
         float tAB = (B.y - A.y != 0) ? (y - A.y) / (B.y - A.y) : 0;
+
+
         float xAC = A.x + tAC * (C.x - A.x);
         float xAB = A.x + tAB * (B.x - A.x);
-        int xStart = (int)fminf(xAC, xAB);
-        int xEnd   = (int)fmaxf(xAC, xAB);
+
+        float zAC = Az + tAC * (Cz - Az);
+        float zAB = Az + tAB * (Bz - Az);
+
+        float xStart, zStart, xEnd, zEnd;
+        if (xAC < xAB) {
+            xStart = xAC; zStart = zAC;
+            xEnd   = xAB; zEnd   = zAB;
+        } else {
+            xStart = xAB; zStart = zAB;
+            xEnd   = xAC; zEnd   = zAC;
+        }
         for (int x = xStart; x <= xEnd; x++) {
-            writePixel((Vec2){x, y}, fillCol);
+            float t;
+            if (xEnd - xStart != 0 )
+                t = (x - xStart) / (xEnd - xStart);
+            else t =0;
+            float z = zStart + t * (zEnd - zStart);
+            writeDepthPixel((Vec2){x,y}, z, fillCol);
         }
     }
 
@@ -195,12 +243,31 @@ void drawFilledTriangle(Vec2 A, Vec2 B, Vec2 C, Color outlineCol, Color fillCol)
     for (int y = y1; y < y2; y++) {
         float tAC = (C.y - A.y != 0) ? (y - A.y) / (C.y - A.y) : 0;
         float tBC = (C.y - B.y != 0) ? (y - B.y) / (C.y - B.y) : 0;
+
+
         float xAC = A.x + tAC * (C.x - A.x);
         float xBC = B.x + tBC * (C.x - B.x);
-        int xStart = (int)fminf(xAC, xBC);
-        int xEnd   = (int)fmaxf(xAC, xBC);
+
+        float zAC = Az + tAC * (Cz - Az);
+        float zBC = Bz + tBC * (Cz - Bz);
+        
+
+
+        float xStart, zStart, xEnd, zEnd;
+        if (xAC < xBC) {
+            xStart = xAC; zStart = zAC;
+            xEnd   = xBC; zEnd   = zBC;
+        } else {
+            xStart = xBC; zStart = zBC;
+            xEnd   = xAC; zEnd   = zAC;
+        }
         for (int x = xStart; x <= xEnd; x++) {
-            writePixel((Vec2){x, y}, fillCol);
+            float t;
+            if (xEnd - xStart != 0 )
+                t = (x - xStart) / (xEnd - xStart);
+            else t=0;
+            float z = zStart + t * (zEnd - zStart);
+            writeDepthPixel((Vec2){x,y}, z, fillCol);
         }
     }
 }
@@ -230,8 +297,9 @@ void drawFilledTriangle(Vec2 A, Vec2 B, Vec2 C, Color outlineCol, Color fillCol)
 
 
 
-void drawFace(Vec2 *pointsToDraw, int *face, Color c){
-    Vec2 A,B,C,D;
+void drawFace(ProjectedVertex *pointsToDraw, int *face, Color c){
+    ProjectedVertex A,B,C,D;
+
     A= pointsToDraw[face[0]];
     B= pointsToDraw[face[1]];
     C= pointsToDraw[face[2]];

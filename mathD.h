@@ -15,6 +15,12 @@ typedef struct
     float m[4][4];
 } Mat4;
 
+typedef struct 
+{
+    Vec2 point;
+    float depth;
+} ProjectedVertex;
+
 
 
 float vec2_dot(Vec2 A, Vec2 B);
@@ -55,7 +61,7 @@ Vec4 mat4_mul_vec4(Mat4 m, Vec4 v);
 Vec4 vec3_to_vec4(Vec3 A);
 
 
-Vec2 project(Vec3 point, float fov);
+ProjectedVertex project(Vec3 point, float fov);
 
 Vec2 ndc_to_screen(Vec2 ndc);
 

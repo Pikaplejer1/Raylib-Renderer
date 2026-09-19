@@ -7,9 +7,9 @@ LDLIBS := -lraylib  -lm
 
 ARGS =
 
-all: renderer.exe 
+all: main.exe 
 
-renderer.exe: renderer.o draw.o global.o util.o mathD.o logger.o objects.o
+main.exe : renderer.o draw.o global.o util.o mathD.o logger.o objects.o main.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LDLIBS)
 
 renderer.o: renderer.c renderer.h global.h
@@ -39,8 +39,11 @@ test.exe: test.o mathD.o
 test.o: test.c
 	$(CC) $(CFLAGS) -c $<  -o $@
 
-run: renderer.exe
-	./renderer.exe $(ARGS)
+main.o: main.c
+	$(CC) $(CFLAGS) -c $<  -o $@
+
+run: main.exe
+	./main.exe $(ARGS)
 
 clean:
 	rm -f *.o *.exe
