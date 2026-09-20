@@ -3,6 +3,7 @@
 
 
 int main(int argc, char **argv){
+    srand(time(NULL));
     Color col[10];
     for(int i=0; i<10; i++){
         col[i] = getRandomColor();
@@ -29,7 +30,9 @@ int main(int argc, char **argv){
     Vec3 *cubeVertices = testCube.vertices;
     int (*cubeFaces)[4] = testCube.faces;
     int (*cubeEdges)[2] = testCube.edges;
-
+    
+    int counter =0; 
+    
     Vec3 mass = {0,0,0};
     Vec2 projected[8];
     for(int i=0; i<8;i++){
@@ -42,23 +45,39 @@ int main(int argc, char **argv){
     Mat4 translationToCentre = mat4_translate(-centre.x, -centre.y, -centre.z);
     Mat4 translationToOrigin = mat4_translate(centre.x, centre.y,centre.z);
     ProjectedVertex toDraw[8];
-    
+    Vec3 rotatedVertices[8];
     while(!WindowShouldClose()){
-        Mat4 rotate_x = mat4_identity();//mat4_rotate_x(GetTime());
+        
+        
+        
+        //build the rotation
+        Mat4 rotate_x = mat4_rotate_x(GetTime());
         Mat4 rotate_y =mat4_rotate_y(GetTime()/2);
         Mat4 rotate_z =mat4_rotate_z(GetTime()/3);
+        Mat4 transformationMatrix = 
+            mat4_multiply(rotate_z,
+            mat4_multiply(rotate_y,rotate_x));
+
+
+
         for(int i=0;i<8;i++){
-            Mat4 transformationMatrix = 
-                mat4_multiply(rotate_z,
-                mat4_multiply(rotate_y,rotate_x));
-                        
+            //convert the points to homogenous
             Vec4 verticesVec4 = vec3_to_vec4( cubeVertices[i]);
-            Vec4 newPos = mat4_mul_vec4(translationToCentre, verticesVec4);
+
+            //translate to centre
+            Vec4 newPos = mat4_mul_vec4(translationToCentre, verticesVec4); 
+            //main transformation of the vertices
             newPos = mat4_mul_vec4(transformationMatrix, newPos);
+            //translate back to the original position 
             newPos = mat4_mul_vec4(translationToOrigin, newPos);
+
+
+            //convert homogenous points back to normal points.
             Vec3 newPosVec3 = vec4_to_vec3(newPos);
-            
+
             ProjectedVertex projectedVertex = project(newPosVec3,FOV);
+
+            rotatedVertices[i] = newPosVec3;
             toDraw[i] = projectedVertex;
 
         }
@@ -66,14 +85,25 @@ int main(int argc, char **argv){
             writeThickPixel(toDraw[i].point, 36, RED);
         }
         for(int i=0; i<6;i++){
-            // Vec2 A,B,C,D;
-            // A= toDraw[cubeFaces[i][0]];
-            // B= toDraw[cubeFaces[i][1]];
-            // C= toDraw[cubeFaces[i][2]];
-            // D= toDraw[cubeFaces[i][3]];
-            // drawFilledTriangle(A,B,C, RED,YELLOW);
-            // drawFilledTriangle(A,D,C, RED,YELLOW);
-            drawFace(toDraw, cubeFaces[i], col[i]);
+            Vec3 A,B,C;
+            counter++;
+            if(counter>=144){
+                int faceCounter=0;
+                for(int i=0; i<6;i++){
+                    if(getFacing(rotatedVertices[cubeFaces[i][0]],rotatedVertices[cubeFaces[i][1]],rotatedVertices[cubeFaces[i][2]])>0)
+                        faceCounter++;
+                }
+                logger(DEBUG, "The number of visible faces at a moment is: %i", faceCounter);
+                counter=0;
+            }
+            A = rotatedVertices[cubeFaces[i][0]];
+            B = rotatedVertices[cubeFaces[i][1]];
+            C = rotatedVertices[cubeFaces[i][2]];
+
+            float facing = getFacing(A,B,C);
+            if (facing>=0)
+                drawFace(toDraw, cubeFaces[i], col[i]);
+
         }
         rlDrawingAPI();
     }

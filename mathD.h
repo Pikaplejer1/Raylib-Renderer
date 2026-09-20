@@ -70,3 +70,32 @@ void getBaricentric(Vec2 A, Vec2 B, Vec2 C, Vec2 p, float* l1, float* l2, float*
 Vec2 getInfiniteLineIntersectionPoint(Vec2 Line1Point1, Vec2 Line1Point2, Vec2 Line2Point1, Vec2 Line2Point2);
 
 int getSegmentLineIntersectionPoint(Vec2 Line1Point1, Vec2 Line1Point2, Vec2 Line2Point1, Vec2 Line2Point2, Vec2* out);
+
+/**
+ * All vectors should follow clockwise direction  
+ * @return a (non-normalized) normal of two vector3 starting from vector A. 
+ * @param A is the Vector 0 (or the start position) of the two other vectors.
+ * @param B is the Vector 1 of the figure 
+ * @param C is the vector 2 of the figure 
+ */
+Vec3 getNormalVec3(Vec3 A, Vec3 B, Vec3 C);
+
+/**
+ * All vectors should follow clockwise direction  
+ * @return a normalized (0-1) normal of two vector3 starting from vector A. 
+ * @param A is the Vector 0 (or the start position) of the two other vectors.
+ * @param B is the Vector 1 of the figure 
+ * @param C is the vector 2 of the figure 
+ */
+Vec3 getNormalizedNormalVec3(Vec3 A, Vec3 B, Vec3 C);
+
+/**
+ * This function takes in 3 vertices and returns which way do they face. 
+ * It is crucial to put them in clockwise order. 
+ * @return a facing value of the specific face (triangle)
+ * @param A Is the 1st vertex of the cube
+ * @param B is the 2nd vertex of the cube
+ * @param C is the 3rd vertex of the cube
+ */
+float getFacing(Vec3 A, Vec3 B, Vec3 C);
+

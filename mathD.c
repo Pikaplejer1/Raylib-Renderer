@@ -25,6 +25,7 @@ Vec2 vec2_minus(Vec2 A, Vec2 B){
     return (Vec2){A.x-B.x, A.y-B.y};
 }
 
+
 Vec2 vec2_normalize(Vec2 A){
     float length = vec2_length(A);
     if(length< EPSILON) return (Vec2){0,0};
@@ -319,4 +320,23 @@ int getSegmentLineIntersectionPoint(Vec2 Line1Point1, Vec2 Line1Point2, Vec2 Lin
 
     return 1;
 
+}
+
+Vec3 getNormalVec3(Vec3 A, Vec3 B, Vec3 C){
+    Vec3 edge1 = vec3_minus(B,A);
+    Vec3 edge2 = vec3_minus(C,A);
+    Vec3 normal = vec3_cross(edge2,edge1);
+    return normal;
+}
+
+Vec3 getNormalizedNormalVec3(Vec3 A, Vec3 B, Vec3 C){
+    Vec3 normal= getNormalVec3(A,B,C);
+    return vec3_normalize(normal);
+}
+
+float getFacing(Vec3 A, Vec3 B, Vec3 C){
+    Vec3 toCamera = vec3_minus(cameraPos, A);
+    Vec3 normal =getNormalVec3(A, B, C);
+    float facing = vec3_dot(normal, toCamera);
+    return facing;
 }

@@ -3,6 +3,8 @@
 #include <assert.h>
 
 #include "mathD.h"
+#include "objects.h"
+#include "logger.h"
 
 #define FLOAT_EQ(a, b) (fabs((a) - (b)) < EPSILON)  // float comparison with tolerance
 
@@ -368,5 +370,21 @@ int main(){
     test_mat4_rotate_z();
     test_mat4_mul_vec4();
     printf("\nAll tests passed!\n");
+    
+    Vec3 *cubeVertices = testCube.vertices;
+    Vec3 cameraPos = {0,0,0};
+    int (*cubeFaces)[4] = testCube.faces;
+    int (*cubeEdges)[2] = testCube.edges;
+
+    logger_vec3(DEBUG, "This is the vertext1: {%f,%f,%f}", cubeVertices[0]);
+    Vec3 toCamera = vec3_minus(cameraPos, cubeVertices[0]);
+    logger_vec3(DEBUG, "This is the result of toCamera:{%f,%f,%f} ", toCamera);
+    
+    Vec3 normal =getNormalVec3(cubeVertices[cubeFaces[0][0]], cubeVertices[cubeFaces[0][1]], cubeVertices[cubeFaces[0][3]]);
+    logger_vec3(DEBUG, "This is the normal of first face:{%f,%f,%f} ", normal);
+      
+
+    float facing = vec3_dot(normal, toCamera);
+    logger(DEBUG, "this is the facing value of the face: %f", facing);
     return 0;
 }
