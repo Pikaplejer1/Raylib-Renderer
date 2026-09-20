@@ -23,11 +23,12 @@ clean:
 main.exe : renderer.o draw.o global.o util.o mathD.o logger.o objects.o main.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LDLIBS)
 
-test.exe: test.o mathD.o objects.o global.o logger.o
+test.exe: test.o mathD.o objects.o global.o logger.o fileRead.o
 	$(CC) $(CFLAGS) $^ -o $@  -L$(LDFLAGS) $(LDLIBS)
 
 
-
+fileRead.o: fileRead.c fileRead.h
+	$(CC) $(CFLAGS) -c $<  -o $@
 
 renderer.o: renderer.c renderer.h
 	$(CC) $(CFLAGS) -c $<  -o $@

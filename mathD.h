@@ -22,6 +22,14 @@ typedef struct
 } ProjectedVertex;
 
 
+typedef struct{
+    Vec3* vertices;
+    int** triangleIndices;
+    int innitialised;
+    int vertexCount;
+    int faceCount;
+} obj;
+
 
 float vec2_dot(Vec2 A, Vec2 B);
 float vec2_cross(Vec2 A, Vec2 B);

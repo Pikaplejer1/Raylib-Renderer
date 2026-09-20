@@ -1,10 +1,13 @@
 #include <math.h>
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
 
 #include "mathD.h"
 #include "objects.h"
 #include "logger.h"
+#include "fileRead.h"
+
 
 #define FLOAT_EQ(a, b) (fabs((a) - (b)) < EPSILON)  // float comparison with tolerance
 
@@ -328,6 +331,58 @@ void test_mat4_mul_vec4(){
     printf("PASS\n\n");
 }
 
+void test_load_obj_cube(){
+    printf("load_obj_cube:\n");
+
+    obj *loaded = NULL;
+    int result = getObjectFileFromName(".obj/testCube.obj", &loaded);
+    printf("  getObjectFileFromName returned: %d (expected 0)\n", result);
+    assert(result == 0);
+    assert(loaded != NULL);
+    assert(loaded->innitialised == 1);
+
+    // dane referencyjne - dokładnie to co jest w testCube.obj, po korekcie -1
+    Vec3 expectedVertices[8] = {
+        {-125,-125,250}, {125,-125,250}, {125,125,250}, {-125,125,250},
+        {-125,-125,500}, {125,-125,500}, {125,125,500}, {-125,125,500}
+    };
+    int expectedTriangles[12][3] = {
+        {0,1,2}, {0,2,3},
+        {0,4,5}, {0,5,1},
+        {1,5,6}, {1,6,2},
+        {7,6,5}, {7,5,4},
+        {3,7,4}, {3,4,0},
+        {2,6,7}, {2,7,3}
+    };
+
+    printf("  sprawdzam 8 wierzcholkow...\n");
+    for(int i=0;i<8;i++){
+        printf("    v[%d]: {%f,%f,%f} (expected {%f,%f,%f})\n", i,
+            loaded->vertices[i].x, loaded->vertices[i].y, loaded->vertices[i].z,
+            expectedVertices[i].x, expectedVertices[i].y, expectedVertices[i].z);
+        assert(FLOAT_EQ(loaded->vertices[i].x, expectedVertices[i].x));
+        assert(FLOAT_EQ(loaded->vertices[i].y, expectedVertices[i].y));
+        assert(FLOAT_EQ(loaded->vertices[i].z, expectedVertices[i].z));
+    }
+
+    printf("  sprawdzam 12 trojkatow...\n");
+    for(int i=0;i<12;i++){
+        printf("    f[%d]: {%d,%d,%d} (expected {%d,%d,%d})\n", i,
+            loaded->triangleIndices[i][0], loaded->triangleIndices[i][1], loaded->triangleIndices[i][2],
+            expectedTriangles[i][0], expectedTriangles[i][1], expectedTriangles[i][2]);
+        assert(loaded->triangleIndices[i][0] == expectedTriangles[i][0]);
+        assert(loaded->triangleIndices[i][1] == expectedTriangles[i][1]);
+        assert(loaded->triangleIndices[i][2] == expectedTriangles[i][2]);
+    }
+
+    // sprzątanie - odwrotna kolejność alokacji
+    for(int i=0;i<12;i++) free(loaded->triangleIndices[i]);
+    free(loaded->triangleIndices);
+    free(loaded->vertices);
+    free(loaded);
+
+    printf("PASS\n\n");
+}
 // ─── MAIN ───────────────────────────────────────────────────────────────────
 
 int main(){
@@ -369,6 +424,7 @@ int main(){
     test_mat4_rotate_y();
     test_mat4_rotate_z();
     test_mat4_mul_vec4();
+    test_load_obj_cube();
     printf("\nAll tests passed!\n");
     
     Vec3 *cubeVertices = testCube.vertices;

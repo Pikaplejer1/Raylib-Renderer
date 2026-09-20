@@ -15,7 +15,13 @@ void drawFilledTriangle(ProjectedVertex APoint, ProjectedVertex BPoint, Projecte
 
 void drawFace(ProjectedVertex *pointsToDraw, int *face, Color c);
 
-
+/**
+ * Try not to use this one because it is not depth pixel
+ */
 void writeThickPixel(Vec2 a, int thickness, Color c);
+/**
+ * Try not to use this one because it is not depth pixel
+ */
 void writePixel(Vec2 a, Color c);
+
 void writeDepthPixel(Vec2 a, float z, Color c);
