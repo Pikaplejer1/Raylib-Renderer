@@ -1,110 +1,108 @@
 
 #include "AllImports.h"
 
+#define COUNT 12
 
-int main(int argc, char **argv){
-    srand(time(NULL));
-    Color col[10];
-    for(int i=0; i<10; i++){
+Color col[COUNT];
+
+
+
+Vec3* vertices;
+int** triangleIndices;
+int innitialised;
+
+int vertexCount;
+int faceCount;
+
+ProjectedVertex* projectedVertexToDraw = NULL;
+Vec3* depthVertices = NULL;
+
+void seedColour(){
+    for(int i=0; i<COUNT; i++){
         col[i] = getRandomColor();
     }
-    // access it: framebuffer[i*screen_width + j]
+}
+
+void envSetup(){
     InitWindow(SCREEN_WIDTH,SCREEN_HEIGHT, "atari brakeout type shit ");
     SetTargetFPS(144);
-
     innitAllBuffers(); // innit frame buffer and z buffer 
-
     innitImg();
-    srand(time(NULL));
-    // createGradientTest(RED, BLUE);
-    
-    /*x0: 634, y0: 89
-    x0: 282, y0: 47
-    x0: 406, y0: 344*/
-    //(Vector2){634,89},(Vector2){282,47},(Vector2){406,344}
-    // for(int i=0;i<5;i++)
-    //     drawFilledTriangle(getRandomPos(),getRandomPos(),getRandomPos(), getRandomColor());
-    
-   
+    srand(time(NULL)); 
+}
 
-    Vec3 *cubeVertices = testCube.vertices;
-    int (*cubeFaces)[4] = testCube.faces;
-    int (*cubeEdges)[2] = testCube.edges;
+
+int counter =0; 
+
+int loadFile(char* filename, obj** loaded){
+    int result = getObjectFileFromName(filename, loaded);
+    logger(INFO, "The file loaded with the result: %d", result);
+    logger(INFO, "the value of the loaded obj face count is: %d", (*loaded)->faceCount);
+    if(result==0) return 0;
+    else return -1;
+}
+
+void readObjValues(obj* object){
+    if(object==NULL) logger(WARNING, "the object pointer is null in readObjValues");
+    faceCount= object->faceCount;
+    logger(DEBUG, "face caount: %d", faceCount);
+    vertexCount = object->vertexCount;
+    vertices = object->vertices;
+    triangleIndices = object->triangleIndices;
+    logger(DEBUG, "this should run if all readobj vlues are correct");
+}
+
+
+int mallocTheVertices(){
+    projectedVertexToDraw = malloc(vertexCount* sizeof(ProjectedVertex));
+    if(projectedVertexToDraw == NULL )return -1;
+    depthVertices = malloc(vertexCount*sizeof(Vec3));
+    if(depthVertices == NULL )return -1;
+    return 0;
+}
+
+
+int main(int argc, char **argv){
+
+    envSetup();
+    obj* loaded;
+    seedColour();
+
+    loadFile(".obj/testCube.obj", &loaded);
+    if(loaded==NULL) logger(DEBUG, "the loaded value is null");
+    readObjValues(loaded);
     
-    int counter =0; 
+    int mallocResult = mallocTheVertices();
+    logger(DEBUG, "The malloc of vertices resulted with: %d", mallocResult);
+    logger(DEBUG, "the values of the counts are face/vertex: %d, %d", faceCount, vertexCount);
     
-    Vec3 mass = {0,0,0};
-    Vec2 projected[8];
-    for(int i=0; i<8;i++){
-        mass.x +=cubeVertices[i].x;
-        mass.y +=cubeVertices[i].y;
-        mass.z +=cubeVertices[i].z;
-    }
-    Vec3 centre = {mass.x/8, mass.y/8, mass.z/8};
-    logger_vec3(DEBUG, "x:%f, y:%f, :%f", centre);
-    Mat4 translationToCentre = mat4_translate(-centre.x, -centre.y, -centre.z);
-    Mat4 translationToOrigin = mat4_translate(centre.x, centre.y,centre.z);
-    ProjectedVertex toDraw[8];
-    Vec3 rotatedVertices[8];
+    
     while(!WindowShouldClose()){
-        
-        
-        
-        //build the rotation
-        Mat4 rotate_x = mat4_rotate_x(GetTime());
-        Mat4 rotate_y =mat4_rotate_y(GetTime()/2);
-        Mat4 rotate_z =mat4_rotate_z(GetTime()/3);
-        Mat4 transformationMatrix = 
-            mat4_multiply(rotate_z,
-            mat4_multiply(rotate_y,rotate_x));
-
-
-
-        for(int i=0;i<8;i++){
-            //convert the points to homogenous
-            Vec4 verticesVec4 = vec3_to_vec4( cubeVertices[i]);
-
-            //translate to centre
-            Vec4 newPos = mat4_mul_vec4(translationToCentre, verticesVec4); 
-            //main transformation of the vertices
-            newPos = mat4_mul_vec4(transformationMatrix, newPos);
-            //translate back to the original position 
-            newPos = mat4_mul_vec4(translationToOrigin, newPos);
-
-
-            //convert homogenous points back to normal points.
-            Vec3 newPosVec3 = vec4_to_vec3(newPos);
-
-            ProjectedVertex projectedVertex = project(newPosVec3,FOV);
-
-            rotatedVertices[i] = newPosVec3;
-            toDraw[i] = projectedVertex;
-
+        for(int i=0; i<vertexCount; i++){
+            logger_vec3(DEBUG, "the values are as follows: %f, %f, %f", vertices[i]);
+            Vec3 vertexToDraw = vertices[i];
+    
+            projectedVertexToDraw[i] = project(vertexToDraw,FOV);
+            depthVertices[i] = vertexToDraw;
+    
+            // logger_vec2(DEBUG, "the value of projected vertexvertex: %f ,%f", projectedVertexToDraw[i].point);
+            // writeDepthPixel(projectedVertexToDraw[i].point, projectedVertexToDraw[i].depth, RED);
         }
-        for(int i=0;i<8;i++){
-            writeThickPixel(toDraw[i].point, 36, RED);
-        }
-        for(int i=0; i<6;i++){
-            Vec3 A,B,C;
-            counter++;
-            if(counter>=144){
-                int faceCounter=0;
-                for(int i=0; i<6;i++){
-                    if(getFacing(rotatedVertices[cubeFaces[i][0]],rotatedVertices[cubeFaces[i][1]],rotatedVertices[cubeFaces[i][2]])>0)
-                        faceCounter++;
-                }
-                logger(DEBUG, "The number of visible faces at a moment is: %i", faceCounter);
-                counter=0;
-            }
-            A = rotatedVertices[cubeFaces[i][0]];
-            B = rotatedVertices[cubeFaces[i][1]];
-            C = rotatedVertices[cubeFaces[i][2]];
+        for(int i=0; i<faceCount;i++){
+            // logger(DEBUG, "The indices of the triangles are as follows{%d, %d, %d}", triangleIndices[i][0], triangleIndices[i][1],triangleIndices[i][2]);
+            // if(i<vertexCount)
+                // logger_vec2(DEBUG, "the values are as follows: %f, %f", projectedVertexToDraw[i].point);
 
-            float facing = getFacing(A,B,C);
-            if (facing>=0)
-                drawFace(toDraw, cubeFaces[i], col[i]);
-
+            Vec3 A, B, C;
+            A = depthVertices[triangleIndices[i][0]];
+            B = depthVertices[triangleIndices[i][1]];
+            C = depthVertices[triangleIndices[i][2]];
+            float facingValue = getFacing(A,B,C);
+            // logger(DEBUG, "the facing value is: %f", facingValue);
+            if(facingValue >=0)
+                drawFace(projectedVertexToDraw,triangleIndices[i],col[i]);
         }
+        
         rlDrawingAPI();
     }
 }

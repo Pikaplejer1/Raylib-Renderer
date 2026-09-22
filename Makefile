@@ -1,12 +1,17 @@
-.PHONY: all clean run test
+.PHONY: all clean run test run-addr
 
 RAYLIB_PATH := /C/raylib/raylib/src
 
-CC := gcc
+
+SANITIZE := -fsanitize=address -g
+CC := gcc 
 CFLAGS  := -Wall -std=c99 -Wno-missing-braces -Wno-unused-variable -O2
 LDLIBS := -lraylib  -lm
 
-ARGS =
+ARGS = 
+
+run-addr: main-sanitized.exe
+	./main-sanitized.exe
 
 all: main.exe 
 test: test.exe
@@ -19,8 +24,11 @@ run: main.exe
 clean:
 	rm -f *.o *.exe
 
+main-sanitized.exe : renderer.o draw.o global.o util.o mathD.o logger.o objects.o main.o fileRead.o
+	$(CC) $(SANITIZE) $(CFLAGS) $^ -o $@ $(LDLIBS)
 
-main.exe : renderer.o draw.o global.o util.o mathD.o logger.o objects.o main.o
+
+main.exe : renderer.o draw.o global.o util.o mathD.o logger.o objects.o main.o fileRead.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LDLIBS)
 
 test.exe: test.o mathD.o objects.o global.o logger.o fileRead.o
@@ -50,8 +58,6 @@ logger.o: logger.c logger.h
 
 objects.o: objects.c objects.h
 	$(CC) $(CFLAGS) -c $<  -o $@
-
-
 
 test.o: test.c mathD.h objects.h
 	$(CC) $(CFLAGS) -c $<  -o $@

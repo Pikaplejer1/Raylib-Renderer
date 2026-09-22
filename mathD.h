@@ -15,6 +15,11 @@ typedef struct
     float m[4][4];
 } Mat4;
 
+
+/**
+ * Vec2 - point;
+ * float- depth;
+ */
 typedef struct 
 {
     Vec2 point;

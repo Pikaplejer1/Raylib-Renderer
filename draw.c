@@ -298,13 +298,11 @@ void drawFilledTriangle(ProjectedVertex APoint, ProjectedVertex BPoint, Projecte
 
 
 void drawFace(ProjectedVertex *pointsToDraw, int *face, Color c){
-    ProjectedVertex A,B,C,D;
+    ProjectedVertex A,B,C;
 
     A= pointsToDraw[face[0]];
     B= pointsToDraw[face[1]];
     C= pointsToDraw[face[2]];
-    D= pointsToDraw[face[3]];
 
     drawFilledTriangle(A,B,C, TRANSPARENT,c);
-    drawFilledTriangle(A,C,D, TRANSPARENT,c);
 }
