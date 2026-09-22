@@ -340,3 +340,15 @@ float getFacing(Vec3 A, Vec3 B, Vec3 C){
     float facing = vec3_dot(normal, toCamera);
     return facing;
 }
+
+
+Vec3 getCentreMass(Vec3* A, int n){
+    Vec3 centre;
+    for(int i=0; i<n; i++){
+        centre.x+=A[i].x;
+        centre.y+=A[i].y;
+        centre.z+=A[i].z;
+    }
+    centre = (Vec3){centre.x/n, centre.y/n, centre.z/n};
+    return centre;
+}

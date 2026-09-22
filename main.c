@@ -1,9 +1,8 @@
 
 #include "AllImports.h"
 
-#define COUNT 12
 
-Color col[COUNT];
+
 
 
 
@@ -16,9 +15,10 @@ int faceCount;
 
 ProjectedVertex* projectedVertexToDraw = NULL;
 Vec3* depthVertices = NULL;
+Color* col = NULL;
 
 void seedColour(){
-    for(int i=0; i<COUNT; i++){
+    for(int i=0; i<faceCount; i++){
         col[i] = getRandomColor();
     }
 }
@@ -58,47 +58,82 @@ int mallocTheVertices(){
     if(projectedVertexToDraw == NULL )return -1;
     depthVertices = malloc(vertexCount*sizeof(Vec3));
     if(depthVertices == NULL )return -1;
+    col = malloc(faceCount*sizeof(Color));
+    if(col == NULL )return -1;
     return 0;
 }
 
+Vec3 centreOfMass;
+Mat4 translationToCentre;
+Mat4 translationToOrigin;
+Mat4 transformationMatrix;
+
+void prepareCentreOfMass(){
+    centreOfMass = getCentreMass(vertices, vertexCount);
+}
+
+void prepareRotationMatrix(){
+    Mat4 rotate_x = mat4_rotate_x(GetTime());
+    Mat4 rotate_y =mat4_rotate_y(GetTime()/2);
+    Mat4 rotate_z =mat4_rotate_z(GetTime()/3);
+    
+    transformationMatrix = 
+        mat4_multiply(rotate_z,
+        mat4_multiply(rotate_y,rotate_x));
+}
+void prepareTranslationMatrices(){
+    translationToCentre = mat4_translate(-centreOfMass.x, -centreOfMass.y, -centreOfMass.z);
+    translationToOrigin = mat4_translate(centreOfMass.x, centreOfMass.y,centreOfMass.z);
+}
+
+void prepareMatrices(){
+    prepareCentreOfMass();
+    prepareRotationMatrix();
+    prepareTranslationMatrices();
+}
 
 int main(int argc, char **argv){
 
     envSetup();
-    obj* loaded;
-    seedColour();
-
+    
+    obj* loaded = NULL;
     loadFile(".obj/testCube.obj", &loaded);
     if(loaded==NULL) logger(DEBUG, "the loaded value is null");
+
     readObjValues(loaded);
+    if(mallocTheVertices()!= 0 ) logger(WARNING, "Malloc of vertices returned !=0!");
     
-    int mallocResult = mallocTheVertices();
-    logger(DEBUG, "The malloc of vertices resulted with: %d", mallocResult);
-    logger(DEBUG, "the values of the counts are face/vertex: %d, %d", faceCount, vertexCount);
-    
+    seedColour();
     
     while(!WindowShouldClose()){
+        prepareMatrices();
         for(int i=0; i<vertexCount; i++){
-            logger_vec3(DEBUG, "the values are as follows: %f, %f, %f", vertices[i]);
-            Vec3 vertexToDraw = vertices[i];
-    
-            projectedVertexToDraw[i] = project(vertexToDraw,FOV);
-            depthVertices[i] = vertexToDraw;
+
+            Vec4 verticesVec4 = vec3_to_vec4(vertices[i]);
+            Vec4 posToTranslate4 = mat4_mul_vec4(translationToCentre, verticesVec4);
+            posToTranslate4 = mat4_mul_vec4(transformationMatrix, posToTranslate4);
+            Vec4 translatedPos = mat4_mul_vec4(translationToOrigin, posToTranslate4);
+
+            Vec3 translatedPos3 = vec4_to_vec3(translatedPos);
+
+            projectedVertexToDraw[i] = project(translatedPos3,FOV);
+
+            depthVertices[i] = translatedPos3;
     
             // logger_vec2(DEBUG, "the value of projected vertexvertex: %f ,%f", projectedVertexToDraw[i].point);
             // writeDepthPixel(projectedVertexToDraw[i].point, projectedVertexToDraw[i].depth, RED);
         }
         for(int i=0; i<faceCount;i++){
-            // logger(DEBUG, "The indices of the triangles are as follows{%d, %d, %d}", triangleIndices[i][0], triangleIndices[i][1],triangleIndices[i][2]);
-            // if(i<vertexCount)
-                // logger_vec2(DEBUG, "the values are as follows: %f, %f", projectedVertexToDraw[i].point);
+            logger(DEBUG, "The indices of the triangles are as follows{%d, %d, %d}", triangleIndices[i][0], triangleIndices[i][1],triangleIndices[i][2]);
+            if(i<vertexCount)
+                logger_vec2(DEBUG, "the values are as follows: %f, %f", projectedVertexToDraw[i].point);
 
             Vec3 A, B, C;
             A = depthVertices[triangleIndices[i][0]];
             B = depthVertices[triangleIndices[i][1]];
             C = depthVertices[triangleIndices[i][2]];
             float facingValue = getFacing(A,B,C);
-            // logger(DEBUG, "the facing value is: %f", facingValue);
+            logger(DEBUG, "the facing value is: %f", facingValue);
             if(facingValue >=0)
                 drawFace(projectedVertexToDraw,triangleIndices[i],col[i]);
         }

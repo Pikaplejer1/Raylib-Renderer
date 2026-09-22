@@ -112,3 +112,9 @@ Vec3 getNormalizedNormalVec3(Vec3 A, Vec3 B, Vec3 C);
  */
 float getFacing(Vec3 A, Vec3 B, Vec3 C);
 
+/**
+ * @return A 3D point of the centre of gravity an array of points
+ * @param A* takes an array of Vec3 to determine their centre of gravity/mass
+ * @param n  takes the count of Vec3 points of the Arr \A
+ */
+Vec3 getCentreMass(Vec3* A, int n);
