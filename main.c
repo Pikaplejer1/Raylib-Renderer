@@ -1,7 +1,7 @@
 
 #include "AllImports.h"
 
-
+#include "main.h"
 
 
 
@@ -17,6 +17,8 @@ ProjectedVertex* projectedVertexToDraw = NULL;
 Vec3* depthVertices = NULL;
 Color* col = NULL;
 
+int rotationEnabled=0;
+
 void seedColour(){
     for(int i=0; i<faceCount; i++){
         col[i] = getRandomColor();
@@ -29,6 +31,7 @@ void envSetup(){
     innitAllBuffers(); // innit frame buffer and z buffer 
     innitImg();
     srand(time(NULL)); 
+    setTransformationToIdentity();
 }
 
 
@@ -73,13 +76,13 @@ void prepareCentreOfMass(){
 }
 
 void prepareRotationMatrix(){
-    Mat4 rotate_x = mat4_rotate_x(GetTime());
-    Mat4 rotate_y =mat4_rotate_y(GetTime()/2);
-    Mat4 rotate_z =mat4_rotate_z(GetTime()/3);
+    // Mat4 rotate_x = mat4_rotate_x(GetTime());
+    // Mat4 rotate_y =mat4_rotate_y(GetTime()/2);
+    // Mat4 rotate_z =mat4_rotate_z(GetTime()/3);
     
-    transformationMatrix = 
-        mat4_multiply(rotate_z,
-        mat4_multiply(rotate_y,rotate_x));
+    transformationMatrix =  mat4_rotate_y(GetTime());
+        // mat4_multiply(rotate_z,
+        // mat4_multiply(rotate_y,rotate_x));
 }
 void prepareTranslationMatrices(){
     translationToCentre = mat4_translate(-centreOfMass.x, -centreOfMass.y, -centreOfMass.z);
@@ -87,17 +90,25 @@ void prepareTranslationMatrices(){
 }
 
 void prepareMatrices(){
+    
     prepareCentreOfMass();
     prepareRotationMatrix();
     prepareTranslationMatrices();
 }
+
+void setTransformationToIdentity(){
+    transformationMatrix = mat4_identity();
+    translationToCentre = mat4_identity();
+    translationToOrigin = mat4_identity();
+}
+
 
 int main(int argc, char **argv){
 
     envSetup();
     
     obj* loaded = NULL;
-    loadFile(".obj/testCube.obj", &loaded);
+    loadFile(".obj/utah_teapot.obj", &loaded);
     if(loaded==NULL) logger(DEBUG, "the loaded value is null");
 
     readObjValues(loaded);
@@ -106,34 +117,34 @@ int main(int argc, char **argv){
     seedColour();
     
     while(!WindowShouldClose()){
-        prepareMatrices();
+        if (rotationEnabled) prepareRotationMatrix();
         for(int i=0; i<vertexCount; i++){
 
-            Vec4 verticesVec4 = vec3_to_vec4(vertices[i]);
-            Vec4 posToTranslate4 = mat4_mul_vec4(translationToCentre, verticesVec4);
-            posToTranslate4 = mat4_mul_vec4(transformationMatrix, posToTranslate4);
-            Vec4 translatedPos = mat4_mul_vec4(translationToOrigin, posToTranslate4);
+            Mat4 modelScale = mat4_scale(100, 100, 100);
+            Mat4 translate = mat4_translate(0,100,500);
+            centreOfMass= getCentreMass(vertices, vertexCount);
+            Vec4 v4 = vec3_to_vec4(vertices[i]);
+            v4 = mat4_mul_vec4(translationToCentre, v4);
+            v4 = mat4_mul_vec4(modelScale, v4);
+            v4 = mat4_mul_vec4(mat4_rotate_x(1.7), v4);
+            v4 = mat4_mul_vec4(translate, v4);
+            v4 = mat4_mul_vec4(translationToOrigin, v4);
 
-            Vec3 translatedPos3 = vec4_to_vec3(translatedPos);
+            Vec3 v3 = vec4_to_vec3(v4);
 
-            projectedVertexToDraw[i] = project(translatedPos3,FOV);
-
-            depthVertices[i] = translatedPos3;
-    
-            // logger_vec2(DEBUG, "the value of projected vertexvertex: %f ,%f", projectedVertexToDraw[i].point);
-            // writeDepthPixel(projectedVertexToDraw[i].point, projectedVertexToDraw[i].depth, RED);
+            projectedVertexToDraw[i] = project(v3,80);
+            depthVertices[i] = v3;
         }
         for(int i=0; i<faceCount;i++){
-            logger(DEBUG, "The indices of the triangles are as follows{%d, %d, %d}", triangleIndices[i][0], triangleIndices[i][1],triangleIndices[i][2]);
-            if(i<vertexCount)
-                logger_vec2(DEBUG, "the values are as follows: %f, %f", projectedVertexToDraw[i].point);
-
+            // logger(DEBUG, "The indices of the triangles are as follows{%d, %d, %d}", triangleIndices[i][0], triangleIndices[i][1],triangleIndices[i][2]);
+            // if(i<vertexCount)
+            //     logger_vec2(DEBUG, "the values are as follows: %f, %f", projectedVertexToDraw[i].point);
             Vec3 A, B, C;
             A = depthVertices[triangleIndices[i][0]];
             B = depthVertices[triangleIndices[i][1]];
             C = depthVertices[triangleIndices[i][2]];
             float facingValue = getFacing(A,B,C);
-            logger(DEBUG, "the facing value is: %f", facingValue);
+            // logger(DEBUG, "the facing value is: %f", facingValue);
             if(facingValue >=0)
                 drawFace(projectedVertexToDraw,triangleIndices[i],col[i]);
         }

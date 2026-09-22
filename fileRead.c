@@ -40,7 +40,7 @@ int setupFile(char* filename){
         if(sscanf(line, "v %f %f %f",&x,&y,&z)==3)
             maxVertexIndex++;
 
-        if(sscanf(line,"f %d %d %d",&q,&w,&r)==3)
+        if (parseFaceLine(line, &q, &w, &r))
             maxFaceIndex++;
     }
     //move the pointer to the beginning
@@ -64,6 +64,15 @@ void freeObj(obj *o){
     free(o->triangleIndices);
     free(o);
 }
+
+int parseFaceLine(const char *line, int *a, int *b, int *c){
+    if (sscanf(line, "f %d/%*d/%*d %d/%*d/%*d %d/%*d/%*d", a, b, c) == 3) return 1;
+    if (sscanf(line, "f %d//%*d %d//%*d %d//%*d", a, b, c) == 3) return 1;
+    if (sscanf(line, "f %d/%*d %d/%*d %d/%*d", a, b, c) == 3) return 1;
+    if (sscanf(line, "f %d %d %d", a, b, c) == 3) return 1;
+    return 0;
+}
+
 
 int getObjectFileFromName(char* filename, obj** object){
     //file doesn't exit
@@ -107,8 +116,6 @@ int getObjectFileFromName(char* filename, obj** object){
         }
     }
 
-    
-
     //read the actuall file
     char line[256];
         while(fgets(line,sizeof(line), f) != NULL){
@@ -119,7 +126,7 @@ int getObjectFileFromName(char* filename, obj** object){
                 vertexIndex++;
             }
             int q,w,r;
-            if(sscanf(line, "f %d %d %d", &q, &w, &r)==3){
+            if (parseFaceLine(line, &q, &w, &r)) {
                 c->triangleIndices[faceIndex][0] = q-1;
                 c->triangleIndices[faceIndex][1] = w-1;
                 c->triangleIndices[faceIndex][2] = r-1;
