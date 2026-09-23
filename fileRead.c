@@ -16,6 +16,8 @@ int vertexIndex=0;
 const int triangleIndexCount=3;
 
 
+// TODO here i need to add a signed volume to deremine if the winding order is 123 or 132. 
+
 
 int setupFile(char* filename){
     float x,y,z;
@@ -128,8 +130,8 @@ int getObjectFileFromName(char* filename, obj** object){
             int q,w,r;
             if (parseFaceLine(line, &q, &w, &r)) {
                 c->triangleIndices[faceIndex][0] = q-1;
-                c->triangleIndices[faceIndex][1] = w-1;
-                c->triangleIndices[faceIndex][2] = r-1;
+                c->triangleIndices[faceIndex][1] = r-1;
+                c->triangleIndices[faceIndex][2] = w-1;
                 faceIndex++;
             }
         }

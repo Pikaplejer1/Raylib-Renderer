@@ -117,18 +117,20 @@ int main(int argc, char **argv){
     seedColour();
     
     while(!WindowShouldClose()){
-        if (rotationEnabled) prepareRotationMatrix();
+        transformationMatrix = mat4_multiply(  
+        mat4_rotate_y(GetTime()), mat4_rotate_x(1.4));
+
+        // if (rotationEnabled) prepareRotationMatrix();
         for(int i=0; i<vertexCount; i++){
 
             Mat4 modelScale = mat4_scale(100, 100, 100);
-            Mat4 translate = mat4_translate(0,100,500);
+            Mat4 translate = mat4_translate(0,100,600);
             centreOfMass= getCentreMass(vertices, vertexCount);
             Vec4 v4 = vec3_to_vec4(vertices[i]);
             v4 = mat4_mul_vec4(translationToCentre, v4);
             v4 = mat4_mul_vec4(modelScale, v4);
-            v4 = mat4_mul_vec4(mat4_rotate_x(1.7), v4);
+            v4 = mat4_mul_vec4(transformationMatrix, v4);
             v4 = mat4_mul_vec4(translate, v4);
-            v4 = mat4_mul_vec4(translationToOrigin, v4);
 
             Vec3 v3 = vec4_to_vec3(v4);
 
