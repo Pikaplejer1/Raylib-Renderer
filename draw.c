@@ -177,15 +177,13 @@ void drawTriangle(Vec2 A, Vec2 B, Vec2 C, Color col){
 
 void drawFilledTriangle(ProjectedVertex APoint, ProjectedVertex BPoint, ProjectedVertex CPoint, Color outlineCol, Color fillCol){
     
-    
     Vec2 A = APoint.point;
     Vec2 B = BPoint.point;
     Vec2 C = CPoint.point;
 
-
-    float Az =APoint.depth;
-    float Bz =BPoint.depth;
-    float Cz =CPoint.depth;
+    float Az = APoint.depth;
+    float Bz = BPoint.depth;
+    float Cz = CPoint.depth;
 
     // sortujemy wierzchołki rosnąco po y: A na górze, C na dole
     if (A.y > B.y) { 
@@ -201,19 +199,19 @@ void drawFilledTriangle(ProjectedVertex APoint, ProjectedVertex BPoint, Projecte
         float ftmp=Az; Az=Bz; Bz=ftmp;
     }
 
-    
-
-    int y0 = (int)A.y;
-    int y1 = (int)B.y;
-    int y2 = (int)C.y;
-
-    
+    // Zamiast ucinania ułamków, znajdujemy pierwszą fizyczną linię skanowania wewnątrz trójkąta.
+    int y0 = ceilf(A.y);
+    int y1 = ceilf(B.y);
+    int y2 = ceilf(C.y);
 
     // góra: krótka krawędź A->B, długa krawędź A->C
     for (int y = y0; y < y1; y++) {
         float tAC = (C.y - A.y != 0) ? (y - A.y) / (C.y - A.y) : 0;
         float tAB = (B.y - A.y != 0) ? (y - A.y) / (B.y - A.y) : 0;
 
+        // Okrutnie, ale skutecznie wymuszamy wartości między 0 a 1.
+        if(tAC < 0.0f) tAC = 0.0f; if(tAC > 1.0f) tAC = 1.0f;
+        if(tAB < 0.0f) tAB = 0.0f; if(tAB > 1.0f) tAB = 1.0f;
 
         float xAC = A.x + tAC * (C.x - A.x);
         float xAB = A.x + tAB * (B.x - A.x);
@@ -229,11 +227,13 @@ void drawFilledTriangle(ProjectedVertex APoint, ProjectedVertex BPoint, Projecte
             xStart = xAB; zStart = zAB;
             xEnd   = xAC; zEnd   = zAC;
         }
-        for (int x = xStart; x <= xEnd; x++) {
-            float t;
-            if (xEnd - xStart != 0 )
-                t = (x - xStart) / (xEnd - xStart);
-            else t =0;
+        
+        int xStartInt = ceilf(xStart);
+        int xEndInt = floorf(xEnd);
+        
+        for (int x = xStartInt; x <= xEndInt; x++) {
+            float t = (xEnd - xStart != 0 ) ? (x - xStart) / (xEnd - xStart) : 0;
+            if(t < 0.0f) t = 0.0f; if(t > 1.0f) t = 1.0f;
             float z = zStart + t * (zEnd - zStart);
             writeDepthPixel((Vec2){x,y}, z, fillCol);
         }
@@ -244,6 +244,8 @@ void drawFilledTriangle(ProjectedVertex APoint, ProjectedVertex BPoint, Projecte
         float tAC = (C.y - A.y != 0) ? (y - A.y) / (C.y - A.y) : 0;
         float tBC = (C.y - B.y != 0) ? (y - B.y) / (C.y - B.y) : 0;
 
+        if(tAC < 0.0f) tAC = 0.0f; if(tAC > 1.0f) tAC = 1.0f;
+        if(tBC < 0.0f) tBC = 0.0f; if(tBC > 1.0f) tBC = 1.0f;
 
         float xAC = A.x + tAC * (C.x - A.x);
         float xBC = B.x + tBC * (C.x - B.x);
@@ -251,8 +253,6 @@ void drawFilledTriangle(ProjectedVertex APoint, ProjectedVertex BPoint, Projecte
         float zAC = Az + tAC * (Cz - Az);
         float zBC = Bz + tBC * (Cz - Bz);
         
-
-
         float xStart, zStart, xEnd, zEnd;
         if (xAC < xBC) {
             xStart = xAC; zStart = zAC;
@@ -261,11 +261,13 @@ void drawFilledTriangle(ProjectedVertex APoint, ProjectedVertex BPoint, Projecte
             xStart = xBC; zStart = zBC;
             xEnd   = xAC; zEnd   = zAC;
         }
-        for (int x = xStart; x <= xEnd; x++) {
-            float t;
-            if (xEnd - xStart != 0 )
-                t = (x - xStart) / (xEnd - xStart);
-            else t=0;
+        
+        int xStartInt = ceilf(xStart);
+        int xEndInt = floorf(xEnd);
+        
+        for (int x = xStartInt; x <= xEndInt; x++) {
+            float t = (xEnd - xStart != 0 ) ? (x - xStart) / (xEnd - xStart) : 0;
+            if(t < 0.0f) t = 0.0f; if(t > 1.0f) t = 1.0f;
             float z = zStart + t * (zEnd - zStart);
             writeDepthPixel((Vec2){x,y}, z, fillCol);
         }

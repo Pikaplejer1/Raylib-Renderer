@@ -16,6 +16,7 @@ int faceCount;
 ProjectedVertex* projectedVertexToDraw = NULL;
 Vec3* depthVertices = NULL;
 Color* col = NULL;
+float* brightness = NULL;
 
 int rotationEnabled=0;
 
@@ -62,6 +63,7 @@ int mallocTheVertices(){
     depthVertices = malloc(vertexCount*sizeof(Vec3));
     if(depthVertices == NULL )return -1;
     col = malloc(faceCount*sizeof(Color));
+    brightness = malloc(faceCount*sizeof(float));
     if(col == NULL )return -1;
     return 0;
 }
@@ -100,6 +102,11 @@ void setTransformationToIdentity(){
     transformationMatrix = mat4_identity();
     translationToCentre = mat4_identity();
     translationToOrigin = mat4_identity();
+}
+
+int getRandomColourValue(){
+    int random =rand()%255+1;
+    return random;
 }
 
 
@@ -146,9 +153,20 @@ int main(int argc, char **argv){
             B = depthVertices[triangleIndices[i][1]];
             C = depthVertices[triangleIndices[i][2]];
             float facingValue = getFacing(A,B,C);
-            // logger(DEBUG, "the facing value is: %f", facingValue);
-            if(facingValue >=0)
+            Vec3 normalizedNormal = getNormalizedNormalVec3(A,B,C);
+            // logger_vec3(DEBUG, "the values for the normalized normal are as follows: %f, %f, %f", normalizedNormal);
+            brightness[i] = vec3_dot(normalizedNormal, (Vec3){-lightSource.x, -lightSource.y, -lightSource.z});
+            if(brightness[i]<0) brightness[i] = -brightness[i];
+            // logger(DEBUG, "the value of the brighness is:%f", brightness[i]);
+            float rVal =getRandomColourValue() * brightness[i];
+            float gVal= getRandomColourValue() * brightness[i];
+            float bVal= getRandomColourValue() * brightness[i];
+            // logger(DEBUG, "the vlue of the colours are : r: %f, g: %f, b:%f", rVal,gVal,bVal);
+            col[i] = (Color){rVal, gVal, bVal, 255};
+            if(facingValue>=0)
                 drawFace(projectedVertexToDraw,triangleIndices[i],col[i]);
+            
+            
         }
         
         rlDrawingAPI();

@@ -15,3 +15,4 @@ extern float *zBuffer;
 extern Color *framebuffer;
 extern Texture2D tex;
 extern Vec3 cameraPos;
+extern Vec3 lightSource;
